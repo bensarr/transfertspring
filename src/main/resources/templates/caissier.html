@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Caisse</title>
+    <!-- CSS only -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body style="background-color: #b9bbbe">
+<br>
+<br>
+<br>
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" th:href="@{index}">Navbar</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" th:href="@{index}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#envoi">Envoi</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#retrait">Retrait</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Transfert
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#clientModal" data-whatever="@mdo">Envoi</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#caissierModal" data-whatever="@mdo">Retrait</a>
+                    </div>
+                </li>
+            </ul>
+            <a href="#" class="navbar-brand btn btn-danger"
+               data-toggle="modal" data-target="#confirmDeconnexion"><i class="fa fa-power-off"></i></a>
+        </div>
+    </nav>
+</div>
+<br>
+
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+        <div class="navbar-nav mr-auto">
+            <p class="nav-item text-light" >Caissier: </p>
+            <p class="nav-item text-info" th:text="${'    '+caissier.nom.toUpperCase()+' '+caissier.prenom.toUpperCase()}"></p>
+        </div>
+        <div class="navbar-brand">
+            <p class="nav-item text-light" >Solde:</p>
+            <p class="nav-item text-danger" th:text="${#numbers.formatDecimal(caissier.solde, 1, 'DEFAULT', 0, 'DEFAULT')}"></p>
+        </div>
+    </nav>
+</div>
+<div class="container" th:if="${title!=null and message!='' and step!=0}">
+    <div class="card" id="message">
+        <div class="card-body alert-success"  th:if="${step>0}">
+            <div class="card-header">
+                <h5 class="card-title" th:text="${title}"></h5>
+            </div>
+            <div class="card-text">
+                <p th:text="${message}"></p>
+                <p>Code de Retrait:  </p>
+                <h5 class="text-info" th:text="${code}"></h5>
+            </div>
+        </div>
+        <div class="card-body alert-danger"  th:if="${step<0}">
+            <div class="card-header">
+                <h5 class="card-title" th:text="${title}"></h5>
+            </div>
+            <div class="card-text">
+                <p th:text="${message}"></p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <nav class="navbar navbar-lg navbar-dark bg-dark">
+
+        <!--navbar Start-->
+        <form class="form-inline" th:action="@{index}" method="get">
+            <input class="form-control mr-sm-5" type="search" placeholder="Entrer l'Identifiant Nationnal" aria-label="Search" name="search_nci" id="search_nci">
+            <button class="btn btn-outline-info my-2 my-sm-0" type="submit"><i class="fa fa-search"></i></button>
+        </form>
+
+        <form class="form-inline" th:action="@{index}" method="get">
+            <input class="form-control mr-sm-4" type="search" placeholder="Entrer le code d'Envoi" aria-label="Search" name="search_code" id="search_code">
+            <button class="btn btn-outline-info my-2 my-sm-0" type="submit"><i class="fa fa-search"></i></button>
+        </form>
+    </nav>
+    <table class="table table-striped table-sm" th:if= "${search_nci != '' and clientsearch!=null}">
+        <thead class="table-dark">
+        <tr>
+            <th>N.C.I</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>TelePhone</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody class="table-light">
+        <tr>
+            <td th:text="${clientsearch.nci}" class="text text-center text-info"></td>
+            <td th:text="${clientsearch.nom}"></td>
+            <td th:text="${clientsearch.prenom}"></td>
+            <td th:text="${clientsearch.telephone}"></td>
+            <td>
+                <a class="btn btn-danger envoiClient" href="#" th:data="${clientsearch.nci}" id="envoiClient"
+                        role="button" data-toggle="modal" data-target="#envoiModal">
+                    <i class="fa fa-money fa-2x"></i>
+                </a>
+                <input type="hidden" class="error" id="error" role="alertdialog" data-toggle="modal" data-target="#errorModal">
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <table class="table table-striped table-sm" th:if= "${search_code != '' and envoisearch!=null}">
+        <thead class="table-dark">
+        <tr>
+            <th>Code</th>
+            <th>Montant</th>
+            <th>Date</th>
+            <th>De</th>
+            <th>A</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody class="table-light">
+        <tr>
+            <td th:text="${envoisearch.code}" class="text-center text-danger"></td>
+            <td th:text="${#numbers.formatDecimal(envoisearch.montant, 1, 'DEFAULT', 0, 'DEFAULT')}" class="text-center text-info"></td>
+            <td th:text="${envoisearch.date.dayOfMonth+' '+envoisearch.date.month+' '+envoisearch.date.year+' à '+envoisearch.date.toLocalTime()}"></td>
+            <td th:text="${envoisearch.clientEmetteur.nom}+'    '+${envoisearch.clientEmetteur.prenom}"></td>
+            <td th:text="${envoisearch.clientRecepteur.nom}+'    '+${envoisearch.clientRecepteur.prenom}"></td>
+            <td>
+                <a class="btn btn-success retraitClient" href="#" th:data="${envoisearch.code+'-'+envoisearch.montant+'-'+envoisearch.clientRecepteur.nci+'-'+envoisearch.clientRecepteur.nom+'-'+envoisearch.clientRecepteur.prenom+'-'+envoisearch.clientEmetteur.nom+'-'+envoisearch.clientEmetteur.prenom}" id="retraitClient"
+                   role="button" data-toggle="modal" data-target="#retraitModal">
+                    <i class="fa fa-money fa-2x"></i>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="container envoi" id="envoi">
+    <br/>
+    <br/><br/>
+
+    <!--navbar Start-->
+    <nav class="navbar navbar-lg navbar-dark bg-dark">
+
+        <!--navbar Start-->
+        <span class="navbar-text">
+            <h2>Liste des Envois</h2>
+        </span>
+
+        <form class="form-inline" th:action="@{index}" method="get">
+            <input class="form-control mr-sm-4" type="search" placeholder="Entrer le code" aria-label="Search" name="search_code" th:value="${search_envoi_code}">
+            <button class="btn btn-outline-info my-2 my-sm-0" type="submit"><i class="fa fa-search"></i></button>
+        </form>
+    </nav>
+    <table class="table table-striped table-sm">
+        <thead class="table-dark">
+        <tr>
+            <th>Code</th>
+            <th>Montant</th>
+            <th>Date</th>
+            <th>Etat</th>
+        </tr>
+        </thead>
+        <tbody class="table-light">
+        <tr th:each="envoi:${envois.content}">
+            <td th:text="${envoi.code}" class="text-center text-danger"></td>
+            <td th:text="${#numbers.formatDecimal(envoi.montant, 1, 'DEFAULT', 0, 'DEFAULT')}" class="text-center text-info"></td>
+            <td th:text="${envoi.date.dayOfMonth+' '+envoi.date.month+' '+envoi.date.year+' à '+envoi.date.toLocalTime()}"></td>
+            <td th:text="${envoi.etat}?'Terminé':'En cours'" th:class="${envoi.etat}?'text-success':'text-danger'"></td>
+        </tr>
+        </tbody>
+    </table>
+    <ul class="nav nav-pills">
+        <li th:each="page,status:${pageEnvoi}">
+            <a th:href="@{index(pageenvoi=${status.index},sizeenvoi=${sizePageEnvoi},search_envoi_code=${search_envoi_code})}"
+               th:class="${status.index==currentPageEnvoi}?'btn btn-info':'btn'" th:text="${status.index}"></a>
+        </li>
+    </ul>
+</div>
+
+<div class="container retrait" id="retrait">
+    <br/>
+    <br/><br/>
+
+    <!--navbar Start-->
+    <nav class="navbar navbar-lg navbar-dark bg-dark">
+
+        <!--navbar Start-->
+        <span class="navbar-text">
+            <h2>Liste des Retraits</h2>
+        </span>
+
+        <form class="form-inline" th:action="@{index}" method="get">
+            <input class="form-control mr-sm-4" type="search" placeholder="Entrer le code" aria-label="Search" name="search_code" th:value="${search_retrait_code}">
+            <button class="btn btn-outline-info my-2 my-sm-0" type="submit"><i class="fa fa-search"></i></button>
+        </form>
+    </nav>
+    <table class="table table-striped table-sm">
+        <thead class="table-dark">
+        <tr>
+            <th>Code</th>
+            <th>Montant</th>
+            <th>Frais</th>
+            <th>Date</th>
+        </tr>
+        </thead>
+        <tbody class="table-light">
+        <tr th:each="retrait:${retraits.content}">
+            <td th:text="${retrait.code}" class="text-center text-danger"></td>
+            <td th:text="${#numbers.formatDecimal(retrait.montant, 1, 'DEFAULT', 0, 'DEFAULT')}" class="text-center text-info"></td>
+            <td th:text="${#numbers.formatDecimal(retrait.frais, 1, 'DEFAULT', 0, 'DEFAULT')}" class="text-center text-primary"></td>
+            <td th:text="${retrait.date}"></td>>
+        </tr>
+        </tbody>
+    </table>
+    <ul class="nav nav-pills">
+        <li th:each="page,status:${pageRetrait}">
+            <a th:href="@{index(pageretrait=${status.index},sizeretrait=${sizePageRetrait},search_retrait_code=${search_retrait_code})}"
+               th:class="${status.index==currentPageRetrait}?'btn btn-info':'btn'" th:text="${status.index}"></a>
+        </li>
+    </ul>
+</div>
+
+
+
+
+<!--Envoi Modal-->
+<div class="modal fade" id="envoiModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="depotModalTitle">Opération Envoi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formDepot" method="post" th:action="@{/caissier/envoi}" th:object="${envoi}">
+                <div class="modal-body" id="contentMessage">
+                    <div class="form-group">
+                        <label for="nci" class="col-form-label">Identifiant National:</label>
+                        <input th:field="*{clientEmetteur.nci}" type="text" class="form-control" readonly="readonly" id="nci">
+                    </div>
+                    <div class="form-group">
+                        <label for="telephone" class="col-form-label">Téléphone du Récepteur:</label>
+                        <input th:field="*{clientRecepteur.telephone}" type="text" class="form-control" id="telephone">
+                    </div>
+                    <div class="form-group">
+                        <label for="montant" class="col-form-label">Montant:</label>
+                        <input type="number" class="form-control text-right money" id="montant">
+                    </div>
+                    <div class="form-group">
+                        <label for="fraisEnvoi" class="col-form-label">Frais de Retrait:</label>
+                        <input class="text-danger text-right money"type="text" readonly="readonly" id="fraisEnvoi">
+                        <label class="text-dark" > FCFA</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="total" class="col-form-label">Total à Envoyer:</label>
+                        <input th:field="*{montant}" class="text-success text-right money"type="text" readonly="readonly" id="total">
+                        <label class="text-dark" > FCFA</label>
+                        <label class="text-danger" id="etat"></label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success" id="enregistrer">Enregistrer</button>
+                </div>
+                <input type="hidden"  name="solde" id="solde" th:value="${caissier.solde}">
+            </form>
+        </div>
+    </div>
+</div>
+<!--Retrait Modal-->
+<div class="modal fade" id="retraitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="retraitModalTitle">Opération Retrait</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formRetrait" method="post" th:action="@{/caissier/retrait}" th:object="${envoi}">
+                <div class="modal-body" id="contentMessage2">
+                    <div class="form-group">
+                        <label for="code" class="col-form-label">Identifiant National:</label>
+                        <input th:field="*{code}" type="text" class="form-control" readonly="readonly" id="code">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">De:</label>
+                        <label class="text-info" readonly="readonly" id="emetteur"></label>
+                    </div>
+                    <div class="form-group">
+                        <label for="nciR" class="col-form-label">A:</label>
+                        <label class="text-info" readonly="readonly" id="recepteur"></label>
+                        <input type="text" placeholder="Entrer N.C.I" id="nciR">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Montant:</label>
+                        <label class="text-success text-right" readonly="readonly" id="montantRecu"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Frais:</label>
+                        <label class="text-success text-right" readonly="readonly" id="fraisrecu"></label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success" id="terminer">Terminer</button>
+                </div>
+                <input type="hidden"  name="nciRec" id="nciRec">
+            </form>
+        </div>
+    </div>
+</div>
+<!--Déconnexion-->
+<div class="modal fade" id="confirmDeconnexion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Déconnexion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="form2" method="post">
+                <div class="modal-body" id="contentConfirm">
+                    <p>Êtes vous sûr(e) de vouloir vous déconnecter?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <a href="/logout" type="submit" class="btn btn-danger">OUI</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+<!-- JS -->
+<script type="application/javascript">
+    $(document).ready(function () {
+        //Envoi
+        $('.envoiClient').click(function () {
+            var data = $(this).attr("data");
+            $('#nci').val(data);
+
+        });// th:text="*{clientEmetteur.nom+' '+clientEmetteur.prenom+' ('+clientEmetteur.nci+')'}"
+        //Retrait
+        $('.retraitClient').click(function () {
+            var data = $(this).attr("data").split('-');
+            $('#code').val(data[0]);
+            $('#montantRecu').html(data[1]);
+            $('#fraisrecu').html(parseFloat(data[1])*0.05);
+            $('#nciRec').val(data[2]);
+            $('#recepteur').html(data[3]+' '+data[4]);
+            $('#emetteur').html(data[5]+' '+data[6]);
+            $('#terminer').prop('disabled', true);
+        });
+        $('#nciR').keyup(function (){
+            var nciR=$('#nciR').val();
+            if(nciR===$('#nciRec').val()) {
+                $('#terminer').prop('disabled', false);
+            }
+            else {
+                $('#terminer').prop('disabled', true);
+            }
+        });
+        //Générer frais
+        $('#montant').keyup(function (){
+            var montant=$('#montant').val();
+            var frais=0;
+            var total=0;
+            if(montant==='')
+            {
+                $('#fraisEnvoi').val(0.00);
+                $('#total').val(0.00);
+            }
+            else
+            {
+                frais=parseFloat(montant)*0.05;
+                $('#fraisEnvoi').val(frais);
+            }
+            total=parseFloat(montant)+parseFloat(frais);
+            $('#total').val(total);
+            var solde=parseFloat($('#solde').val());
+            if(solde<total) {
+                $('#etat').html("Solde Insuffisant");
+                $('#enregistrer').prop('disabled', true);
+            }
+            else {
+                $('#etat').html("");
+                $('#enregistrer').prop('disabled', false);
+            }
+        });
+
+    });
+</script>
+</body>
+</html>
